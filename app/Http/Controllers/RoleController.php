@@ -90,8 +90,8 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
         $permission = Permission::get();
-        $rolePermissions = $role->permissions()->getResults()->pluck('id')->all();
-        return view('roles.edit', compact('role', 'permission', 'rolePermissions'));
+        $modelPermissions = $role->permissions()->getResults()->pluck('id')->all();
+        return view('roles.edit', compact('role', 'permission', 'modelPermissions'));
     }
 
     /**

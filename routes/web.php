@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InstallConroller;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -23,6 +24,13 @@ if (env('APP_INSTALLED')) {
     Route::get('/', function () {
         return view('welcome');
     });
+    Auth::routes();
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::group(['middleware' => ['auth']], function () {
+        Route::resource('roles', RoleController::class);
+        Route::resource('users', UserController::class);
+        Route::resource('products', ProductController::class);
+    });
 } else {
     $envFile = app()->environmentFilePath();
     if (!file_exists($envFile)) {
@@ -34,7 +42,6 @@ if (env('APP_INSTALLED')) {
         }
         Artisan::call('key:generate');
     }
-
     Route::get('/install', function () {
         Artisan::call('migrate --seed');
         return redirect('/');
@@ -45,12 +52,3 @@ if (env('APP_INSTALLED')) {
         return redirect('/');
     });
 }
-
-Auth::routes();
-
-Route::get('/home', [HomeController::class, 'index'])->name('home');
-
-Route::group(['middleware' => ['auth']], function () {
-    Route::resource('roles', RoleController::class);
-    Route::resource('users', UserController::class);
-});

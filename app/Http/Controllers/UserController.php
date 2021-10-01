@@ -91,8 +91,8 @@ class UserController extends Controller
         $roles = Role::pluck('name', 'name',)->all();
         $userRole = $user->roles->pluck('name', 'name')->all();
         $permission = Permission::get();
-        $userPermissions = $user->permissions()->getResults()->pluck('id')->all();
-        return view('users.edit', compact('user', 'roles', 'userRole', 'permission', 'userPermissions'));
+        $modelPermissions = $user->permissions()->getResults()->pluck('id')->all();
+        return view('users.edit', compact('user', 'roles', 'userRole', 'permission', 'modelPermissions'));
     }
     /**
      * Update the specified resource in storage.

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class InitTableSeeder extends Seeder
     public function run()
     {
         Schema::disableForeignKeyConstraints(); //DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Product::truncate();
         User::truncate();
         Role::truncate();
         DB::table('model_has_permissions')->truncate();
@@ -38,6 +40,10 @@ class InitTableSeeder extends Seeder
             'role-create',
             'role-edit',
             'role-delete',
+            'product-list',
+            'product-create',
+            'product-edit',
+            'product-delete',
         ];
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission]);
@@ -57,5 +63,8 @@ class InitTableSeeder extends Seeder
             'password' => bcrypt('123456')
         ]);
         $user->assignRole([$role->id]);
+
+        // Create Products
+        Product::factory(8)->create();
     }
 }
