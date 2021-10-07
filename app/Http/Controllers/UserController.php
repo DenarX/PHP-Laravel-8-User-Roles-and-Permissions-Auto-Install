@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Arr;
@@ -40,7 +39,8 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::pluck('name', 'name')->all();
-        return view('users.create', compact('roles'));
+        $permission = $this->getPermissions();
+        return view('users.create', compact('roles', 'permission'))->with('modelPermissions', []);;
     }
 
     /**
@@ -55,7 +55,6 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|same:confirm-password',
-            'roles' => 'required'
         ]);
 
         $input = $request->all();
@@ -63,6 +62,7 @@ class UserController extends Controller
 
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
+        $user->syncPermissions($request->input('permission'));
 
         return redirect()->route('users.index')
             ->with('success', 'User created successfully');
@@ -88,9 +88,10 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = Role::pluck('name', 'name',)->all();
+        $roles = Role::pluck('name', 'name')->all();
         $userRole = $user->roles->pluck('name', 'name')->all();
-        $permission = Permission::get();
+
+        $permission = $this->getPermissions();
         $modelPermissions = $user->permissions()->getResults()->pluck('id')->all();
         return view('users.edit', compact('user', 'roles', 'userRole', 'permission', 'modelPermissions'));
     }
@@ -107,7 +108,6 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'same:confirm-password',
-            'roles' => 'required'
         ]);
 
         $input = $request->all();

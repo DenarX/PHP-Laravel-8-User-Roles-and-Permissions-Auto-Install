@@ -34,12 +34,8 @@ if (env('APP_INSTALLED')) {
 } else {
     $envFile = app()->environmentFilePath();
     if (!file_exists($envFile)) {
-        if (!file_exists($envFile . '.example')) {
-            abort(502, 'File ".env.example" not found');
-        }
-        if (!@copy($envFile . '.example', $envFile)) {
-            abort(503, 'File ".env.example" not found');
-        }
+        abort_unless(file_exists($envFile . '.example'), 502, 'File ".env.example" not found');
+        abort_unless(@copy($envFile . '.example', $envFile), 503, 'File ".env.example" not found');
         Artisan::call('key:generate');
     }
     Route::get('/install', function () {

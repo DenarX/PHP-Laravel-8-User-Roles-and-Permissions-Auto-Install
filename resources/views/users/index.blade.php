@@ -58,6 +58,6 @@
   @endforeach
 </table>
 
-{!! $users->render() !!}
+{{ $users->render('pagination::bootstrap-4') }}
 
 @endsection

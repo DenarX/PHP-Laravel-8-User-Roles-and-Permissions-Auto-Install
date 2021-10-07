@@ -42,8 +42,8 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permission = Permission::get();
-        return view('roles.create', compact('permission'));
+        $permission = $this->getPermissions();
+        return view('roles.create', compact('permission'))->with('modelPermissions', []);;
     }
 
     /**
@@ -89,7 +89,7 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        $permission = Permission::get();
+        $permission = $this->getPermissions();
         $modelPermissions = $role->permissions()->getResults()->pluck('id')->all();
         return view('roles.edit', compact('role', 'permission', 'modelPermissions'));
     }

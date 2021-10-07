@@ -49,11 +49,17 @@ class InitTableSeeder extends Seeder
             Permission::create(['name' => $permission]);
         }
 
+        // Create Products
+        $r = Product::factory(8)->create();
+        $r->each(function ($product, $key) {
+            Permission::create(['name' => "productId-$product->id"]);
+        });
+
         // Create roles
         $role = Role::create(['name' => 'Super Admin']);
         $role->syncPermissions($permissions);
         Role::create(['name' => 'Admin'])->givePermissionTo(array_diff($permissions, ['role-delete', 'user-delete']));
-        Role::create(['name' => 'User'])->givePermissionTo(['user-list', 'role-list']);
+        Role::create(['name' => 'User'])->givePermissionTo(array_diff($permissions, ['user-create', 'user-edit', 'role-create', 'role-edit', 'role-delete', 'user-delete']));
         Role::create(['name' => 'Guest']);
 
         // Create Super Admin
@@ -63,8 +69,5 @@ class InitTableSeeder extends Seeder
             'password' => bcrypt('123456')
         ]);
         $user->assignRole([$role->id]);
-
-        // Create Products
-        Product::factory(8)->create();
     }
 }

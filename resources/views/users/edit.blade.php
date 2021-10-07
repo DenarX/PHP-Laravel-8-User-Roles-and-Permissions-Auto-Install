@@ -55,12 +55,19 @@
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group">
             <strong>Role:</strong>
-            {!! Form::select('roles[]', $roles,$userRole, array('class' => 'form-control','multiple')) !!}
+            {{ Form::select('roles[]', $roles,$userRole??'', 
+                    [ 
+                    'multiple' => true, 
+                    'is' => "select-component",
+                    'search'=>true,
+                    'selectall'=>true,
+                    'selected-options',
+                    ])}}
         </div>
     </div>
-    
+
     @include('layouts.permissions')
-    
+
     <div class="col-xs-12 col-sm-12 col-md-12 text-center">
         <button type="submit" class="btn btn-primary">Submit</button>
     </div>

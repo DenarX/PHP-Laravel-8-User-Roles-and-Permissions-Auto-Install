@@ -15,14 +15,14 @@
 
 
 @if (count($errors) > 0)
-  <div class="alert alert-danger">
+<div class="alert alert-danger">
     <strong>Whoops!</strong> There were some problems with your input.<br><br>
     <ul>
-       @foreach ($errors->all() as $error)
-         <li>{{ $error }}</li>
-       @endforeach
+        @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
     </ul>
-  </div>
+</div>
 @endif
 
 
@@ -55,10 +55,19 @@
     </div>
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="form-group">
-            <strong>Role:</strong>
-            {!! Form::select('roles[]', $roles,[], array('class' => 'form-control','multiple')) !!}
+            {{ Form::select('roles[]', $roles,$userRole??'', 
+                    [ 
+                    'multiple' => true, 
+                    'is' => "select-component",
+                    'search'=>true,
+                    'selectall'=>true,
+                    'selected-options',
+                    ])}}
         </div>
     </div>
+
+    @include('layouts.permissions')
+
     <div class="col-xs-12 col-sm-12 col-md-12 text-center">
         <button type="submit" class="btn btn-primary">Submit</button>
     </div>
