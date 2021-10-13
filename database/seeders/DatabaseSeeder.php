@@ -15,9 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // \App\Models\User::factory(10)->create();
         if (!env('APP_INSTALLED')) {
-            $this->call([
-                InitTableSeeder::class,
-            ]);
+            $this->call([InitTableSeeder::class]);
             setEnvironmentValue(['APP_INSTALLED' => 'true']);
         } else {
             dd('Application have been installed, to reinstall remove APP_INSTALLED from .env');

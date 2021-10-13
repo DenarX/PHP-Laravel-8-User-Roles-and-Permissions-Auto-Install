@@ -3,11 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\InstallConroller;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
@@ -20,31 +18,13 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-if (env('APP_INSTALLED')) {
-    Route::get('/', function () {
-        return view('welcome');
-    });
-    Auth::routes();
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
-    Route::group(['middleware' => ['auth']], function () {
-        Route::resource('roles', RoleController::class);
-        Route::resource('users', UserController::class);
-        Route::resource('products', ProductController::class);
-    });
-} else {
-    $envFile = app()->environmentFilePath();
-    if (!file_exists($envFile)) {
-        abort_unless(file_exists($envFile . '.example'), 502, 'File ".env.example" not found');
-        abort_unless(@copy($envFile . '.example', $envFile), 503, 'File ".env.example" not found');
-        Artisan::call('key:generate');
-    }
-    Route::get('/install', function () {
-        Artisan::call('migrate --seed');
-        return redirect('/');
-    });
-    Route::post('/', [InstallConroller::class, 'install'])->name('install');
-    Route::get('/', [InstallConroller::class, 'firstrun']);
-    Route::fallback(function () {
-        return redirect('/');
-    });
-}
+Route::get('/', function () {
+    return view('welcome');
+});
+Auth::routes();
+Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::group(['middleware' => ['auth']], function () {
+    Route::resource('roles', RoleController::class);
+    Route::resource('users', UserController::class);
+    Route::resource('products', ProductController::class);
+});

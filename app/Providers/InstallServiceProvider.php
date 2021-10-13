@@ -2,69 +2,44 @@
 
 namespace App\Providers;
 
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
 
-class RouteServiceProvider extends ServiceProvider
+class InstallServiceProvider extends ServiceProvider
 {
-    /**
-     * The path to the "home" route for your application.
-     *
-     * This is used by Laravel authentication to redirect users after login.
-     *
-     * @var string
-     */
-    public const HOME = '/home';
-
-    /**
-     * The controller namespace for the application.
-     *
-     * When present, controller route declarations will automatically be prefixed with this namespace.
-     *
-     * @var string|null
-     */
-    // protected $namespace = 'App\\Http\\Controllers';
-
-    /**
-     * Define your route model bindings, pattern filters, etc.
-     *
-     * @return void
-     */
     public function boot()
     {
-        if (!env('APP_INSTALLED')) {
-            $envFile = app()->environmentFilePath();
-            if (!file_exists($envFile)) {
-                abort_unless(file_exists($envFile . '.example'), 502, 'File ".env.example" not found');
-                abort_unless(@copy($envFile . '.example', $envFile), 503, 'File ".env.example" not found');
-                Artisan::call('key:generate');
-            }
-            Route::get('/install', function () {
-                Artisan::call('migrate --seed');
-                return redirect('/');
-            });
-            Route::post('/', function () {
-                $r = validator(request()->all(), [
-                    'host' => 'required',
-                    'username' => 'required',
-                    'password' => 'required',
-                    'database' => 'required'
-                ])->validate();
-                $env = [
-                    'DB_HOST' => $r['host'],
-                    'DB_USERNAME' => $r['username'],
-                    'DB_PASSWORD' => $r['password'],
-                    'DB_DATABASE' => $r['database'],
-                ];
-                setEnvironmentValue($env);
-                return redirect('/install');
-            })->name('install');
-            Route::get('/', function () {
-                return '
+        if (env('APP_INSTALLED')) return;
+        $envFile = app()->environmentFilePath();
+        if (!file_exists($envFile)) {
+            abort_unless(file_exists($envFile . '.example'), 502, 'File ".env.example" not found');
+            abort_unless(@copy($envFile . '.example', $envFile), 503, 'File ".env.example" not found');
+            Artisan::call('key:generate');
+        }
+        Route::get('/install', function () {
+            Artisan::call('migrate --seed');
+            setEnvironmentValue(['APP_INSTALLED' => 'true']);
+            return redirect('/');
+        });
+        Route::post('/', function () {
+            $r = validator(request()->all(), [
+                'host' => 'required',
+                'username' => 'required',
+                'password' => 'required',
+                'database' => 'required'
+            ])->validate();
+            $env = [
+                'DB_HOST' => $r['host'],
+                'DB_USERNAME' => $r['username'],
+                'DB_PASSWORD' => $r['password'],
+                'DB_DATABASE' => $r['database'],
+            ];
+            setEnvironmentValue($env);
+            return redirect('/install');
+        })->name('install');
+        Route::get('/', function () {
+            return '
                 <html lang="en">
         
                 <head>
@@ -113,36 +88,11 @@ class RouteServiceProvider extends ServiceProvider
                     </div>
                 </body>  
             </html>
-                        ';
-            });
-            Route::fallback(function () {
-                return redirect('/');
-            });
-            return;
-        }
-
-        $this->configureRateLimiting();
-        $this->routes(function () {
-            Route::prefix('api')
-                ->middleware('api')
-                ->namespace($this->namespace)
-                ->group(base_path('routes/api.php'));
-
-            Route::middleware('web')
-                ->namespace($this->namespace)
-                ->group(base_path('routes/web.php'));
+            ';
         });
-    }
-
-    /**
-     * Configure the rate limiters for the application.
-     *
-     * @return void
-     */
-    protected function configureRateLimiting()
-    {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
+        Route::fallback(function () {
+            return redirect('/');
         });
+        return;
     }
 }
